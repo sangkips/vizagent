@@ -28,14 +28,14 @@ export default function ChatPage({ documentId, onClose }: ChatPageProps) {
   const [visualization, setVisualization] = useState<string | null>(null)
   const [visualizationTitle, setVisualizationTitle] = useState<string>("")
   const [columns, setColumns] = useState<string[]>([])
-  const [suggestedPrompts, setSuggestedPrompts] = useState<string[]>([
+  const suggestedPrompts = [
     "Show sales trends over the past year",
     "Generate a customer segmentation by age group",
     "Visualize quarterly revenue by region",
     "Show product sales comparison",
     "Display monthly website traffic",
     "Compare marketing campaign performance",
-  ])
+  ]
 
   // Fetch chat history on mount
   useEffect(() => {
@@ -125,13 +125,13 @@ export default function ChatPage({ documentId, onClose }: ChatPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white px-4 md:px-0">
-      <div className="max-w-4xl mx-auto py-8">
-        <button onClick={onClose} className="mb-4 flex items-center text-blue-600 hover:text-blue-800">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-4xl mx-auto py-8 px-4">
+        <button onClick={onClose} className="mb-6 flex items-center text-blue-600 hover:text-blue-800">
           <ArrowLeft size={16} className="mr-1" /> Back to documents
         </button>
 
-        <div className="mb-10">
+        <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800">AI Presentation Assistant</h1>
           <p className="text-gray-600">Generate executive-ready visualizations with natural language</p>
         </div>
@@ -175,7 +175,7 @@ export default function ChatPage({ documentId, onClose }: ChatPageProps) {
           </form>
         </div>
 
-        {!visualization && messages.length === 0 && (
+        {!visualization && (
           <div className="bg-white rounded-xl border p-8">
             <p className="text-center text-gray-600 mb-6">
               Try asking for insights like "Show sales trends over the past year" or select from the suggestions below
@@ -184,11 +184,8 @@ export default function ChatPage({ documentId, onClose }: ChatPageProps) {
               {suggestedPrompts.map((suggestion, index) => (
                 <button
                   key={`suggestion-${index}`}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    handleSuggestionClick(suggestion)
-                  }}
-                  className="text-left p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className="text-left p-4 border rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
                 >
                   {suggestion}
                 </button>
