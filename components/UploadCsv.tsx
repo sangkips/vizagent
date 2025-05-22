@@ -5,8 +5,14 @@ import type React from "react"
 import { useState, useRef } from "react"
 import { Upload } from "lucide-react"
 
+interface UploadedDocument {
+  id: string
+  filename: string
+  uploaded_at: string
+}
+
 interface UploadCSVButtonProps {
-  onUploadSuccess: (newDocument: any) => void
+  onUploadSuccess: (newDocument: UploadedDocument) => void
 }
 
 export default function UploadCSVButton({ onUploadSuccess }: UploadCSVButtonProps) {
