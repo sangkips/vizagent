@@ -5,7 +5,6 @@ interface Document {
   filename: string;
   uploaded_at: string;
 }
-`${process.env.NEXT_PUBLIC_API_URL}/health`
 
 async function fetchDocuments(): Promise<Document[]> {
   try {
