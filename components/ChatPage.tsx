@@ -22,7 +22,7 @@ interface ChatPageProps {
 }
 
 export default function ChatPage({ documentId, onClose }: ChatPageProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [visualization, setVisualization] = useState<string | null>(null)
@@ -41,7 +41,7 @@ export default function ChatPage({ documentId, onClose }: ChatPageProps) {
   useEffect(() => {
     const fetchChatHistory = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/chat/${documentId}/history`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chat/${documentId}/history`)
         if (!response.ok) throw new Error("Failed to fetch chat history")
         const history: ChatMessage[] = await response.json()
         setMessages(history)
@@ -65,7 +65,7 @@ export default function ChatPage({ documentId, onClose }: ChatPageProps) {
     setColumns([])
 
     try {
-      const response = await fetch(`http://localhost:8000/api/chat/${documentId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chat/${documentId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: promptText }),
@@ -178,7 +178,7 @@ export default function ChatPage({ documentId, onClose }: ChatPageProps) {
         {!visualization && (
           <div className="bg-white rounded-xl border p-8">
             <p className="text-center text-gray-600 mb-6">
-              Try asking for insights like "Show sales trends over the past year" or select from the suggestions below
+              {`Try asking for insights like "Show sales trends over the past year" or select from the suggestions below`}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {suggestedPrompts.map((suggestion, index) => (

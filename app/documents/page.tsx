@@ -5,10 +5,11 @@ interface Document {
   filename: string;
   uploaded_at: string;
 }
+`${process.env.NEXT_PUBLIC_API_URL}/health`
 
 async function fetchDocuments(): Promise<Document[]> {
   try {
-    const response = await fetch('http://localhost:8000/api/documents', { cache: 'no-store' });
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/documents`, { cache: 'no-store' });
     if (!response.ok) {
       
       throw new Error('Failed to fetch documents');
@@ -19,6 +20,7 @@ async function fetchDocuments(): Promise<Document[]> {
     }
     return data;
   } catch (error) {
+    console.error('Error fetching documents:', error);
     return [];
   }
 }
