@@ -20,6 +20,7 @@ export default function DocumentList({ documents, onDocumentsChange }: DocumentL
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null)
   const [showChatPage, setShowChatPage] = useState<boolean>(false)
   const [localDocuments, setLocalDocuments] = useState<Document[]>(documents)
+  const [message, setMessage] = useState<string | null>(null)
 
   const handleOpenChat = (docId: string) => {
     setSelectedDocumentId(docId)
@@ -29,6 +30,40 @@ export default function DocumentList({ documents, onDocumentsChange }: DocumentL
   const handleCloseChatPage = () => {
     setShowChatPage(false)
   }
+
+  const handleDelete = async (id: string) => {
+    const res = await fetch(`/api/documents/${id}/delete`, {
+      method: 'DELETE',
+    })
+    if (res.ok) {
+      const updatedDocuments = localDocuments.filter(doc => doc.id !==id)
+      setLocalDocuments(updatedDocuments)
+
+
+      if (onDocumentsChange) onDocumentsChange(updatedDocuments)
+        setMessage("Document deleted successfully")
+
+      setTimeout(() => setMessage(null), 3000)
+
+    } else {
+      setMessage("Failed to delete the document")
+
+      setTimeout(() => setMessage(null), 3000)
+    }
+
+  }
+
+  // const handleRename = async (id: string, newName: string) => {
+  //   const res = await fetch(`/api/documents/${id}/rename`, {
+  //     method: 'PATCH',
+  //     body: JSON.stringify({ filename: newName }),
+  //     headers: { 'Content-Type': 'application/json' },
+  //   })
+
+  //   if (res.ok) {
+  //     // Refresh or update local state
+  //   }
+  // }
 
   const handleUploadSuccess = (newDocument: Document) => {
     console.log("New document received:", newDocument)
@@ -71,7 +106,13 @@ export default function DocumentList({ documents, onDocumentsChange }: DocumentL
       {showChatPage && selectedDocumentId ? (
         <ChatPage documentId={selectedDocumentId} onClose={handleCloseChatPage} />
       ) : (
+
         <div className="container mx-auto py-8 px-4 max-w-6xl">
+          {message && (
+            <div className="mb-4 p-3 rounded-md text-green-800 bg-green-50 border border-green-100">
+              {message}
+            </div>
+          )}
           <div className="flex justify-between items-center mb-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-800">Documents</h1>
@@ -175,9 +216,9 @@ export default function DocumentList({ documents, onDocumentsChange }: DocumentL
                     <CustomDropdown
                       items={[
                         { label: "Open Chat", onClick: () => handleOpenChat(doc.id) },
-                        { label: "Download", onClick: () => {} },
-                        { label: "Rename", onClick: () => {} },
-                        { label: "Delete", onClick: () => {}, className: "text-red-500" },
+                        // { label: "Download", onClick: () => {} },
+                        // { label: "Rename", onClick: () => handleRename(doc.id, doc.filename) },
+                        { label: "Delete", onClick: () => handleDelete(doc.id), className: "text-red-500" },
                       ]}
                     />
                   </div>

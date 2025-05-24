@@ -3,6 +3,8 @@ import DocumentList from '@/components/DocumentList';
 interface Document {
   id: string;
   filename: string;
+  cid: string;
+  file_url: string;
   uploaded_at: string;
 }
 
@@ -28,3 +30,4 @@ export default async function DocumentsPage() {
   const documents = await fetchDocuments();
   return <DocumentList documents={documents} />;
 }
+

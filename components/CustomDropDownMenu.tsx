@@ -10,9 +10,10 @@ interface DropdownItem {
 
 interface CustomDropdownProps {
   items: DropdownItem[]
+  onClose?: () => void
 }
 
-export default function CustomDropdown({ items }: CustomDropdownProps) {
+export default function CustomDropdown({ items, onClose }: CustomDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -24,6 +25,12 @@ export default function CustomDropdown({ items }: CustomDropdownProps) {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
       setIsOpen(false)
     }
+  }
+
+  const handleItemClick = (onClick: () => void) => {
+    onClick()
+    setIsOpen(false)
+    if (onClose) onClose()
   }
 
   useEffect(() => {
@@ -87,3 +94,6 @@ export default function CustomDropdown({ items }: CustomDropdownProps) {
     </div>
   )
 }
+
+
+

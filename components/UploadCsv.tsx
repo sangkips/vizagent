@@ -28,7 +28,7 @@ export default function UploadCSVButton({ onUploadSuccess }: UploadCSVButtonProp
     formData.append("file", file)
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/upload-csv", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload-csv`, {
         method: "POST",
         body: formData,
       })
@@ -39,14 +39,26 @@ export default function UploadCSVButton({ onUploadSuccess }: UploadCSVButtonProp
       }
 
       const result = await response.json()
-      console.log("Upload response:", result) // Log the response for debugging
+      console.log("Full upload response:", result)
+      
+      const fileData = result
 
-      // Create a document object with the expected structure
-      // Ensure we have a valid ID by using the one from the response or generating a unique one
+      if (!fileData) {
+        console.error("No file object found in response:", result)
+        throw new Error("Invalid response format: missing file data")
+      }
+
+      console.log("File data extracted:", fileData)
+
+      if (!fileData.id) {
+        console.error("No ID found in file data:", fileData)
+        throw new Error("Invalid response format: missing file ID")
+      }
+
       const newDocument = {
-        id: result.id || `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        filename: result.filename || file.name,
-        uploaded_at: result.uploaded_at || new Date().toISOString(),
+        id: fileData.id,
+        filename: fileData.filename || file.name,
+        uploaded_at: fileData.uploaded_at || new Date().toISOString(),
       }
 
       onUploadSuccess(newDocument)
