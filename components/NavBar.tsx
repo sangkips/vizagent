@@ -12,6 +12,10 @@ export default function NavBar() {
         <Link href="/documents" className="hover:underline">
           Documents
         </Link>
+         <Link href="/login" className="hover:underline">
+          Login
+        </Link>
+  
       </div>
     </nav>
   );
