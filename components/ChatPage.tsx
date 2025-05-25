@@ -46,7 +46,13 @@ export default function ChatPage({ documentId, onClose }: ChatPageProps) {
   useEffect(() => {
     const fetchChatHistory = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chat/${documentId}/history`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chat/${documentId}/history`, {
+          method: "GET",
+          headers: {
+          Authorization: `Bearer ${token}`,
+         "Content-Type": "application/json",
+        },
+        })
         if (!response.ok) throw new Error("Failed to fetch chat history")
         const history: ChatMessage[] = await response.json()
         setMessages(history)
