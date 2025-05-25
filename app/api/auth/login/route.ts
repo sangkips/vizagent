@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-const users: any[] = [];
+interface User {
+    email: string;
+    password: string;
+}
+
+const users: User[] = [];
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 
@@ -28,16 +33,8 @@ export async function POST(request: NextRequest) {
 
   const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: "1hr" });
 
-  const response = NextResponse.json({
+  return NextResponse.json({
     message: "Login successful",
     access_token: token,
   });
-
-  response.cookies.set("access_token", token, {
-    httpOnly: true,
-    path: "/",
-    sameSite: "lax",
-  });
-
-  return response;
 }

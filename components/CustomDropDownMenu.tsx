@@ -81,7 +81,7 @@ export default function CustomDropdown({ items, onClose }: CustomDropdownProps) 
             {items.map((item, index) => (
               <button
                 key={`dropdown-item-${index}`}
-                onClick={item.onClick}
+                onClick={() => handleItemClick(item.onClick)}
                 className={`block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 ${item.className || ""}`}
                 role="menuitem"
               >

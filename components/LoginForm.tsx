@@ -58,7 +58,7 @@ export default function LoginForm() {
       } else {
         setError(data.detail || "Login failed. Please try again.")
       }
-    } catch (err) {
+    } catch {
       setError("Network error. Please check your connection and try again.")
     } finally {
       setIsLoading(false)

@@ -14,7 +14,7 @@ export default function Homepage() {
 
         <p className="text-lg md:text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed">
           Empowering businesses with cutting-edge solutions. From generating AI-driven analytics to powerful and seamless 
-          visualization tools, we're shaping the future of technology.
+          visualization tools, we{'\''}re shaping the future of technology.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">

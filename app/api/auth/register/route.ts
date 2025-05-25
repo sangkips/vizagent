@@ -1,7 +1,12 @@
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 
-const users: any[] = [];
+interface User {
+    email: string;
+    password: string;
+}
+
+const users: User[] = [];
 
 export async function POST(request: NextRequest) {
     const { email, password } = await request.json();
