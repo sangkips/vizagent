@@ -24,6 +24,11 @@ export default function UploadCSVButton({ onUploadSuccess }: UploadCSVButtonProp
     setIsUploading(true)
     setUploadError(null)
 
+    const token = localStorage.getItem("access_token"); // Retrieve token from localStorage
+    if (!token) {
+      throw new Error("No token found. Please log in again.");
+    }
+
     const formData = new FormData()
     formData.append("file", file)
 
@@ -31,6 +36,9 @@ export default function UploadCSVButton({ onUploadSuccess }: UploadCSVButtonProp
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload-csv`, {
         method: "POST",
         body: formData,
+        headers: {
+          Authorization: `Bearer ${token}`, // Include token in Authorization header
+        },
       })
 
       if (!response.ok) {

@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -18,25 +18,45 @@ export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("error") === "session_expired") {
+        setError("Your session has expired. Please log in again.");
+      }
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     setIsLoading(true)
 
     try {
+      if (!email || !password) {
+        setError("Email and password are required.")
+        setIsLoading(false)
+        return
+      }
+      const formData = new FormData()
+      formData.append("username", email)
+      formData.append("password", password)
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/login`, {
         method: "POST",
-        body: JSON.stringify({ email, password }),
-        headers: { "Content-Type": "application/json" },
+        body: formData,
       })
 
       const data = await res.json()
 
       if (res.ok) {
-        document.cookie = `token=${data.token}; path=/`
-        router.push("/documents")
+        localStorage.setItem("access_token", data.access_token);
+        window.dispatchEvent(new Event("authChange"));
+        const urlParams = new URLSearchParams(window.location.search);
+          const redirect = urlParams.get("redirect") || "/documents";
+          router.push(redirect);
       } else {
-        setError(data.error || "Login failed. Please try again.")
+        setError(data.detail || "Login failed. Please try again.")
       }
     } catch (err) {
       setError("Network error. Please check your connection and try again.")
@@ -49,7 +69,7 @@ export default function LoginForm() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Welcome back</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Login</CardTitle>
           <CardDescription className="text-center">Enter your credentials to access your account</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>

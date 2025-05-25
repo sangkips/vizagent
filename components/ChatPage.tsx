@@ -37,6 +37,11 @@ export default function ChatPage({ documentId, onClose }: ChatPageProps) {
     "Compare marketing campaign performance",
   ]
 
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      throw new Error("No token found. Please log in again.");
+    }
+
   // Fetch chat history on mount
   useEffect(() => {
     const fetchChatHistory = async () => {
@@ -67,11 +72,22 @@ export default function ChatPage({ documentId, onClose }: ChatPageProps) {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chat/${documentId}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: promptText }),
+        headers: {
+          Authorization: `Bearer ${token}`,
+         "Content-Type": "application/json",
+        },
       })
 
-      if (!response.ok) throw new Error("Failed to send message")
+      if (response.status === 401) {
+        localStorage.removeItem("access_token");
+        window.location.href = "/login";
+        throw new Error("Session expired. Please log in again.");
+      }
+
+      if (!response.ok) {
+        throw new Error(`Failed to send message: ${response.statusText}`)
+      }
 
       const data: ChatResponse = await response.json()
       const assistantMessage: ChatMessage = {
