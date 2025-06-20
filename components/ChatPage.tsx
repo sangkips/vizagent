@@ -1,6 +1,6 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 
 import { useState, useEffect } from "react"
 import { ArrowLeft, Download } from "lucide-react"
@@ -28,6 +28,7 @@ export default function ChatPage({ documentId, onClose }: ChatPageProps) {
   const [visualization, setVisualization] = useState<string | null>(null)
   const [visualizationTitle, setVisualizationTitle] = useState<string>("")
   const [columns, setColumns] = useState<string[]>([])
+  const [insights, setInsights] = useState<string>("")
   const suggestedPrompts = [
     "Show sales trends over the past year",
     "Generate a customer segmentation by age group",
@@ -37,10 +38,10 @@ export default function ChatPage({ documentId, onClose }: ChatPageProps) {
     "Compare marketing campaign performance",
   ]
 
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-      throw new Error("No token found. Please log in again.");
-    }
+  const token = localStorage.getItem("access_token")
+  if (!token) {
+    throw new Error("No token found. Please log in again.")
+  }
 
   // Fetch chat history on mount
   useEffect(() => {
@@ -49,9 +50,9 @@ export default function ChatPage({ documentId, onClose }: ChatPageProps) {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chat/${documentId}/history`, {
           method: "GET",
           headers: {
-          Authorization: `Bearer ${token}`,
-         "Content-Type": "application/json",
-        },
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         })
         if (!response.ok) throw new Error("Failed to fetch chat history")
         const history: ChatMessage[] = await response.json()
@@ -73,6 +74,7 @@ export default function ChatPage({ documentId, onClose }: ChatPageProps) {
     setInput("")
     setIsLoading(true)
     setVisualization(null)
+    setInsights("")
     setColumns([])
 
     try {
@@ -81,14 +83,14 @@ export default function ChatPage({ documentId, onClose }: ChatPageProps) {
         body: JSON.stringify({ message: promptText }),
         headers: {
           Authorization: `Bearer ${token}`,
-         "Content-Type": "application/json",
+          "Content-Type": "application/json",
         },
       })
 
       if (response.status === 401) {
-        localStorage.removeItem("access_token");
-        window.location.href = "/login";
-        throw new Error("Session expired. Please log in again.");
+        localStorage.removeItem("access_token")
+        window.location.href = "/login"
+        throw new Error("Session expired. Please log in again.")
       }
 
       if (!response.ok) {
@@ -106,6 +108,10 @@ export default function ChatPage({ documentId, onClose }: ChatPageProps) {
       if (data.visualization) {
         setVisualization(data.visualization)
         setVisualizationTitle(promptText)
+      }
+
+      if (data.response && data.response.includes("For the period")) {
+        setInsights(data.response)
       }
 
       if (data.columns) {
@@ -144,6 +150,55 @@ export default function ChatPage({ documentId, onClose }: ChatPageProps) {
       .split(" ")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ")
+  }
+
+  const formatInsights = (text: string): React.JSX.Element[] => {
+    const lines = text.split("\n").filter((line) => line.trim())
+    const elements: React.JSX.Element[] = []
+
+    lines.forEach((line, index) => {
+      const trimmedLine = line.trim()
+
+      if (trimmedLine.startsWith("For the period") || trimmedLine.includes("total Total Revenue was")) {
+        elements.push(
+          <p key={index} className="text-lg font-semibold text-gray-800 mb-3">
+            {trimmedLine}
+          </p>,
+        )
+      } else if (trimmedLine.startsWith("Top contributors")) {
+        elements.push(
+          <h3 key={index} className="text-md font-medium text-gray-700 mt-4 mb-2">
+            {trimmedLine}
+          </h3>,
+        )
+      } else if (trimmedLine.startsWith("For '") && trimmedLine.endsWith("':")) {
+        elements.push(
+          <h4 key={index} className="text-sm font-medium text-blue-600 mt-3 mb-1 ml-2">
+            {trimmedLine}
+          </h4>,
+        )
+      } else if (trimmedLine.startsWith("- ") || trimmedLine.includes("contributed")) {
+        elements.push(
+          <p key={index} className="text-sm text-gray-600 ml-6 mb-1">
+            {trimmedLine.startsWith("- ") ? trimmedLine : `• ${trimmedLine}`}
+          </p>,
+        )
+      } else if (trimmedLine.includes("Supporting visualization")) {
+        elements.push(
+          <p key={index} className="text-sm text-gray-500 mt-4 italic">
+            {trimmedLine}
+          </p>,
+        )
+      } else if (trimmedLine) {
+        elements.push(
+          <p key={index} className="text-sm text-gray-600 mb-2">
+            {trimmedLine}
+          </p>,
+        )
+      }
+    })
+
+    return elements
   }
 
   return (
@@ -217,24 +272,45 @@ export default function ChatPage({ documentId, onClose }: ChatPageProps) {
         )}
 
         {visualization && (
-          <div className="bg-white rounded-xl border overflow-hidden">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-gray-800">{formatTitle(visualizationTitle)}</h2>
-                <button onClick={handleDownload} className="flex items-center text-blue-600 hover:text-blue-800">
-                  <Download size={16} className="mr-1" /> Download
-                </button>
+          <div className="space-y-6">
+            {/* Insights Section */}
+            {insights && (
+              <div className="bg-blue-50 rounded-xl border border-blue-200 p-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                  <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                    />
+                  </svg>
+                  Key Insights
+                </h2>
+                <div className="space-y-1">{formatInsights(insights)}</div>
               </div>
-              <div className="flex justify-center">
-                <img
-                  src={`data:image/png;base64,${visualization}`}
-                  alt="Visualization"
-                  className="max-w-full h-auto rounded-lg"
-                />
+            )}
+
+            {/* Visualization Section */}
+            <div className="bg-white rounded-xl border overflow-hidden">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-bold text-gray-800">{formatTitle(visualizationTitle)}</h2>
+                  <button onClick={handleDownload} className="flex items-center text-blue-600 hover:text-blue-800">
+                    <Download size={16} className="mr-1" /> Download
+                  </button>
+                </div>
+                <div className="flex justify-center">
+                  <img
+                    src={`data:image/png;base64,${visualization}`}
+                    alt="Visualization"
+                    className="max-w-full h-auto rounded-lg"
+                  />
+                </div>
+                {columns.length > 0 && (
+                  <div className="mt-4 text-sm text-gray-500">Available columns: {columns.join(", ")}</div>
+                )}
               </div>
-              {columns.length > 0 && (
-                <div className="mt-4 text-sm text-gray-500">Available columns: {columns.join(", ")}</div>
-              )}
             </div>
           </div>
         )}
